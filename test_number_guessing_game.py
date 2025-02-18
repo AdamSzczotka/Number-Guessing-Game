@@ -1,6 +1,6 @@
 import pytest
 import os
-from number_guessing_game import GameSettings, ScoreManager
+from number_guessing_game import GameSettings, ScoreManager, CLI
 
 
 @pytest.fixture
@@ -24,6 +24,32 @@ def test_get_score_multiplier(game_settings):
     assert game_settings.get_score_multiplier("easy") == 1
     assert game_settings.get_score_multiplier("medium") == 2
     assert game_settings.get_score_multiplier("hard") == 3
+
+
+@pytest.fixture
+def cli():
+    return CLI()
+
+
+def test_print_welcome_message(cli, capsys):
+    cli.print_welcome_message()
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = ("Welcome to the Number Guessing Game!\n"
+                       "Rules: Guess the number between 1 and 100. "
+                       "You have limited attempts based on your "
+                       "chosen difficulty.")
+    assert output == expected_output
+
+
+def test_get_player_name(cli, monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda _: "TestUser")
+
+    player_name = cli.get_player_name()
+
+    assert player_name == "TestUser"
 
 
 @pytest.fixture
