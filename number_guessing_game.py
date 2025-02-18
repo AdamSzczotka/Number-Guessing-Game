@@ -52,7 +52,15 @@ class GameSettings:
 
 
 class CLI:
-    pass
+    @staticmethod
+    def print_welcome_message():
+        print("Welcome to the Number Guessing Game!")
+        print("Rules: Guess the number between 1 and 100. "
+              "You have limited attempts based on your chosen difficulty.")
+
+    @staticmethod
+    def get_player_name():
+        return input("Enter your name: ")
 
 
 class ScoreManager:
