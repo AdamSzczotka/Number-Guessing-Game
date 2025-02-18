@@ -56,7 +56,36 @@ class CLI:
 
 
 class ScoreManager:
-    pass
+    def __init__(self):
+        self.high_score = {}
+        self.score_history = {}
+
+    def update_high_score(self, difficulty, score, player_name):
+        if difficulty not in self.high_score or \
+           self.high_score[difficulty][1] < score:
+            self.high_score[difficulty] = (player_name, score)
+
+    def display_high_scores(self):
+        print("High Scores: ")
+        for difficulty, (player, score) in self.high_score.items():
+            print(f"{difficulty.capitalize()}: {player} - {score}")
+
+    def save_score_history(self):
+        with open('score_history.json', 'w') as file:
+            json.dump(
+                {key: list(value) for key, value in self.high_score.items()},
+                file
+            )
+
+    def load_score_history(self):
+        try:
+            with open('score_history.json', 'r') as file:
+                data = json.load(file)
+                self.high_score = {
+                    key: tuple(value) for key, value in data.items()
+                    }
+        except FileNotFoundError:
+            self.high_score = {}
 
 
 class HintSystem:
