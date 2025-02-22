@@ -27,6 +27,24 @@ class Player:
         self.total_games_played = 0
         self.total_wins = 0
 
+    def update_stats(self, game_round):
+        self.total_games_played += 1
+        if game_round.is_won:
+            self.total_wins += 1
+            if (game_round.difficulty_level not in self.best_scores or
+                self.best_scores[game_round.difficulty_level] >
+                    game_round.remaining_attempts):
+                self.best_scores[game_round.difficulty_level] = \
+                    game_round.remaining_attempts
+
+    def get_best_score(self, difficulty):
+        return self.best_scores.get(difficulty, None)
+
+    def reset_stats(self):
+        self.best_scores = {}
+        self.total_games_played = 0
+        self.total_wins = 0
+
 
 class GameRound:
     def __init__(self, difficulty_level, number_range,
