@@ -223,6 +223,131 @@ def test_get_player_name(cli, monkeypatch):
     assert player_name == "TestUser"
 
 
+def test_get_difficulty_choice(cli, monkeypatch):
+    difficulty_levels = {
+        "easy": 10,
+        "medium": 7,
+        "hard": 5
+    }
+
+    monkeypatch.setattr("builtins.input", lambda _: "medium")
+
+    choice = cli.get_difficulty_choice(difficulty_levels)
+
+    assert choice == "medium"
+
+
+def test_get_player_guess(cli, monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda _: "50")
+
+    guess = cli.get_player_guess()
+
+    assert guess == 50
+
+
+def test_display_guess_result_correct(cli, capsys):
+    cli.display_guess_result("correct", 50)
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "Congratulations! You guessed the correct number!"
+    assert output == expected_output
+
+
+def test_display_guess_result_greater(cli, capsys):
+    cli.display_guess_result("greater", 50)
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "The number is greater than your guess."
+    assert output == expected_output
+
+
+def test_display_guess_result_less(cli, capsys):
+    cli.display_guess_result("less", 50)
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "The number is less than your guess."
+    assert output == expected_output
+
+
+def test_display_guess_result_lost(cli, capsys):
+    cli.display_guess_result("lost", 50)
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "Game over! The correct number was 50."
+    assert output == expected_output
+
+
+def test_display_game_stats(cli, capsys):
+    class Player:
+        def __init__(self, name):
+            self.name = name
+            self.total_games_played = 5
+            self.total_wins = 3
+
+    player = Player("TestUser")
+
+    class HighScores:
+        def display_high_scores(self):
+            print("High scores: [100, 90, 80]")
+
+    high_scores = HighScores()
+
+    cli.display_game_stats(player, high_scores)
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = (
+        "Player: TestUser, Games Played: 5, Wins: 3\n"
+        "High scores: [100, 90, 80]"
+    )
+    assert output == expected_output
+
+
+def test_play_again_yes(cli, monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda _: "yes")
+
+    result = cli.play_again()
+
+    assert result is True
+
+
+def test_play_again_no(cli, monkeypatch):
+    monkeypatch.setattr("builtins.input", lambda _: "no")
+
+    result = cli.play_again()
+
+    assert result is False
+
+
+def test_show_hint(cli, capsys):
+    cli.show_hint("The number is even.")
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "Hint: The number is even."
+    assert output == expected_output
+
+
+def test_show_error_message(cli, capsys):
+    cli.show_error_message("Invalid input!")
+
+    captured = capsys.readouterr()
+    output = captured.out.strip()
+
+    expected_output = "Invalid input!"
+    assert output == expected_output
+
+
 @pytest.fixture
 def score_manager():
     return ScoreManager()
