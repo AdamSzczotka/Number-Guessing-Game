@@ -61,6 +61,15 @@ class GameRound:
     def get_round_duration(self):
         return (self.end_time or time.time()) - self.start_time
 
+    def provide_hint(self):
+        if self.hints_remaining > 0:
+            self.hints_remaining -= 1
+            return HintSystem.generate_hint(self.target_number)
+        return "No hints left"
+
+    def check_game_over(self):
+        return self.remaining_attempts <= 0 or self.is_won
+
 
 class GameSettings:
     def __init__(self):
@@ -137,7 +146,11 @@ class ScoreManager:
 
 
 class HintSystem:
-    pass
+    @staticmethod
+    def generate_hint(target_number):
+        return f"The number is divisible by {
+            random.choice([x for x in range(1, 11) if target_number % x == 0])
+            }."
 
 
 # Start the game
