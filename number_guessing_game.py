@@ -79,7 +79,7 @@ class GameManager:
 
     def quit_game(self):
         self.high_score.save_score_history()
-        CLI.show_error_message("Thank you for playing! Goodbye!")
+        CLI.show_goodbye_message()
 
 
 class Player:
@@ -93,11 +93,10 @@ class Player:
         self.total_games_played += 1
         if game_round.is_won:
             self.total_wins += 1
+            score = game_round.calculate_score(1)
             if (game_round.difficulty_level not in self.best_scores or
-                self.best_scores[game_round.difficulty_level] >
-                    game_round.remaining_attempts):
-                self.best_scores[game_round.difficulty_level] = \
-                    game_round.remaining_attempts
+                    self.best_scores[game_round.difficulty_level] < score):
+                self.best_scores[game_round.difficulty_level] = score
 
     def get_best_score(self, difficulty):
         return self.best_scores.get(difficulty, None)
