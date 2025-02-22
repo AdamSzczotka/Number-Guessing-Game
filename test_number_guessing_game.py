@@ -31,6 +31,103 @@ def test_start_game(game_manager):
 
 
 @pytest.fixture
+def player():
+    return Player("TestUser")
+
+
+def test_player_initialization(player):
+    assert player.name == "TestUser"
+    assert player.total_games_played == 0
+    assert player.total_wins == 0
+    assert player.best_scores == {}
+
+
+def test_update_stats_win(player, game_round):
+    game_round.is_won = True
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+
+    player.update_stats(game_round)
+
+    assert player.total_games_played == 1
+    assert player.total_wins == 1
+    assert player.best_scores == {"medium": 3}
+
+
+def test_update_stats_loss(player, game_round):
+    game_round.is_won = False
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+
+    player.update_stats(game_round)
+
+    assert player.total_games_played == 1
+    assert player.total_wins == 0
+    assert player.best_scores == {}
+
+
+def test_get_best_score(player, game_round):
+    game_round.is_won = True
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+    player.update_stats(game_round)
+
+    best_score = player.get_best_score("medium")
+
+    assert best_score == 3
+
+
+def test_update_best_score_with_better_attempts(player, game_round):
+    game_round.is_won = True
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+    player.update_stats(game_round)
+
+    game_round.remaining_attempts = 2
+    player.update_stats(game_round)
+
+    best_score = player.get_best_score("medium")
+
+    assert best_score == 2
+
+
+def test_update_best_score_with_worse_attempts(player, game_round):
+    game_round.is_won = True
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+    player.update_stats(game_round)
+
+    game_round.remaining_attempts = 4
+    player.update_stats(game_round)
+
+    best_score = player.get_best_score("medium")
+
+    assert best_score == 3  # Best score should not change
+
+
+def test_reset_stats(player, game_round):
+    game_round.is_won = True
+    game_round.difficulty_level = "medium"
+    game_round.remaining_attempts = 3
+    player.update_stats(game_round)
+
+    player.reset_stats()
+
+    assert player.total_games_played == 0
+    assert player.total_wins == 0
+    assert player.best_scores == {}
+
+
+def test_player_update_stats_with_score(player, game_round_with_score):
+    game_round_with_score.is_won = True
+    player.update_stats(game_round_with_score)
+
+    assert player.total_games_played == 1
+    assert player.total_wins == 1
+    assert player.best_scores == {"medium": 5}
+
+
+@pytest.fixture
 def game_round():
     return GameRound(difficulty_level="medium", number_range=(1, 100),
                      attempts=7, hints_remaining=2)
