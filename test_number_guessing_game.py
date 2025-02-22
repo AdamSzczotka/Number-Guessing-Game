@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch
 import os
 import time
+import random
 from number_guessing_game import GameManager, Player, GameRound
 from number_guessing_game import GameSettings, CLI, ScoreManager
 
@@ -92,6 +93,44 @@ def test_process_guess_edge_cases(game_round_fixed):
     assert result == "greater"
 
 
+def test_provide_hint(game_round_fixed):
+    initial_hints = game_round_fixed.hints_remaining
+
+    hint = game_round_fixed.provide_hint()
+    assert hint is not None
+    assert game_round_fixed.hints_remaining == initial_hints - 1
+
+    # If no hints left
+    game_round_fixed.hints_remaining = 0
+    hint = game_round_fixed.provide_hint()
+    assert hint == "No hints left"
+
+
+# Testing check_game_over method
+def test_check_game_over_no_attempts(game_round_fixed):
+    game_round_fixed.remaining_attempts = 0
+    assert game_round_fixed.check_game_over() is True
+
+
+def test_check_game_over_won(game_round_fixed):
+    game_round_fixed.is_won = True
+    assert game_round_fixed.check_game_over() is True
+
+
+def test_check_game_over_not_over(game_round_fixed):
+    game_round_fixed.remaining_attempts = 3
+    game_round_fixed.is_won = False
+    assert game_round_fixed.check_game_over() is False
+
+
+"""
+# Testing is_won after correct guess
+def test_is_won(game_round_fixed):
+    game_round_fixed.process_guess(game_round_fixed.target_number)
+    assert game_round_fixed.is_won is True
+"""
+
+
 @pytest.fixture
 def game_round_with_score():
     round_instance = GameRound(difficulty_level="medium",
@@ -109,6 +148,30 @@ def test_calculate_score(game_round_with_score):
 
     expected_score = max(0, (5 * multiplayer) - 5)
     assert score == expected_score
+
+
+def test_calculate_score_with_multiple_attempts(game_round_with_score):
+    multiplayer = 2
+    game_round_with_score.remaining_attempts = 3
+    score = game_round_with_score.calculate_score(multiplayer)
+
+    assert score == 1
+
+
+def test_calculate_score_with_no_attempts(game_round_with_score):
+    multiplayer = 2
+    game_round_with_score.remaining_attempts = 0
+    score = game_round_with_score.calculate_score(multiplayer)
+
+    assert score == 0
+
+
+def test_calculate_score_with_long_duration(game_round_with_score):
+    multiplayer = 2
+    game_round_with_score.end_time = game_round_with_score.start_time + 20
+    score = game_round_with_score.calculate_score(multiplayer)
+
+    assert score == 0
 
 
 @pytest.fixture
@@ -234,3 +297,46 @@ def test_load_score_history_no_file(score_manager):
     score_manager.load_score_history()
 
     assert score_manager.high_score == {}
+
+
+class HintSystem:
+    @staticmethod
+    def generate_hint(target_number):
+        return f"The number is divisible by {
+            random.choice([x for x in range(1, 11) if target_number % x == 0])
+            }."
+
+
+@patch('random.choice')
+def test_generate_hint_divisible_by(mock_choice, game_round_fixed):
+    mock_choice.return_value = 5
+    game_round_fixed.target_number = 30
+    hint = HintSystem.generate_hint(game_round_fixed.target_number)
+    assert "5" in hint
+
+
+def test_generate_hint_edge_case(game_round_fixed):
+    game_round_fixed.target_number = 1
+
+    hint = HintSystem.generate_hint(game_round_fixed.target_number)
+    assert "1" in hint
+
+
+@patch('random.choice')
+def test_generate_hint_multiple_possible_divisors(mock_choice,
+                                                  game_round_fixed):
+
+    game_round_fixed.target_number = 60
+
+    mock_choice.return_value = 5
+
+    hint = HintSystem.generate_hint(game_round_fixed.target_number)
+
+    assert "5" in hint
+
+
+def test_generate_hint_invalid_divisor(game_round_fixed):
+    game_round_fixed.target_number = 13
+
+    hint = HintSystem.generate_hint(game_round_fixed.target_number)
+    assert "1" in hint or "13" in hint
