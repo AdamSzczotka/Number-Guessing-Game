@@ -1,6 +1,31 @@
 import pytest
+from unittest.mock import patch
 import os
-from number_guessing_game import GameSettings, ScoreManager, CLI, GameRound
+from number_guessing_game import GameManager, Player, GameRound
+from number_guessing_game import GameSettings, CLI, ScoreManager
+
+
+@pytest.fixture
+def game_manager():
+    return GameManager()
+
+
+def test_start_game(game_manager):
+    with patch.object(CLI, "print_welcome_message") as mock_print_welcome, \
+         patch.object(CLI, "get_player_name", return_value="TestUser") \
+         as mock_get_player_name:
+
+        game_manager.start_game()
+
+        mock_print_welcome.assert_called_once()
+
+        mock_get_player_name.assert_called_once()
+
+        assert game_manager.current_player is not None
+        assert isinstance(game_manager.current_player, Player)
+        assert game_manager.current_player.name == "TestUser"
+
+        assert game_manager.is_game_running is True
 
 
 @pytest.fixture
