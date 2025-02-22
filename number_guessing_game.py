@@ -25,36 +25,57 @@ class GameManager:
         self.quit_game()
 
     def handle_game_round(self):
-        difficulty = CLI.get_difficulty_choice(
-            self.game_settings.difficulty_levels)
-        attempts = self.game_settings.get_attempts(difficulty)
-        hints_allowed = self.game_settings.get_hints_allowed(difficulty)
+        try:
+            difficulty = CLI.get_difficulty_choice(
+                self.game_settings.difficulty_levels)
+            if difficulty not in self.game_settings.difficulty_levels:
+                raise ValueError("Invalid difficulty level")
 
-        game_round = GameRound(difficulty, self.game_settings.number_range,
-                               attempts, hints_allowed)
-        game_round.generate_target_number()
+            attempts = self.game_settings.get_attempts(difficulty)
+            hints_allowed = self.game_settings.get_hints_allowed(difficulty)
 
-        while not game_round.check_game_over():
-            guess = CLI.get_player_guess()
-            result = game_round.process_guess(guess)
-            CLI.display_guess_result(result, game_round.target_number)
+            game_round = GameRound(difficulty, self.game_settings.number_range,
+                                   attempts, hints_allowed)
+            game_round.generate_target_number()
 
-            if result == "correct":
-                game_round.is_won = True
-                self.current_player.update_stats(game_round)
-                score = game_round.calculate_score(
-                    self.game_settings.get_score_multiplier(difficulty))
-                self.high_score.update_high_score(difficulty, score,
-                                                  self.current_player.name)
-                break
-            elif result == "hint":
-                hint = game_round.provide_hint()
-                CLI.show_hint(hint)
+            while not game_round.check_game_over():
+                try:
+                    guess = CLI.get_player_guess()
+                    if guess == "hint":
+                        hint = game_round.provide_hint()
+                        CLI.show_hint(hint)
+                        continue
 
-        if not game_round.is_won:
-            CLI.display_guess_result("lost", game_round.target_number)
+                    guess = int(guess)
+                    if not (self.game_settings.number_range[0] <= guess <=
+                            self.game_settings.number_range[1]):
+                        raise ValueError(
+                            f"Guess must be between "
+                            f"{self.game_settings.number_range[0]} and "
+                            f"{self.game_settings.number_range[1]}")
+                    result = game_round.process_guess(guess)
+                    CLI.display_guess_result(result, game_round.target_number)
+                    if result == "correct":
+                        game_round.is_won = True
+                        game_round.end_time = time.time()
+                        self.current_player.update_stats(game_round)
+                        score = game_round.calculate_score(
+                            self.game_settings.get_score_multiplier(difficulty)
+                        )
+                        self.high_score.update_high_score(
+                            difficulty, score, self.current_player.name
+                        )
+                        break
+                except ValueError as e:
+                    CLI.show_error_message(str(e))
+                    continue
 
-        CLI.display_game_stats(self.current_player, self.high_score)
+            if not game_round.is_won:
+                CLI.display_guess_result("lost", game_round.target_number)
+
+            CLI.display_game_stats(self.current_player, self.high_score)
+        except ValueError as e:
+            CLI.show_error_message(str(e))
 
     def quit_game(self):
         self.high_score.save_score_history()
@@ -80,11 +101,6 @@ class Player:
 
     def get_best_score(self, difficulty):
         return self.best_scores.get(difficulty, None)
-
-    def reset_stats(self):
-        self.best_scores = {}
-        self.total_games_played = 0
-        self.total_wins = 0
 
 
 class GameRound:
