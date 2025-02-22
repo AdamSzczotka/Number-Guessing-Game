@@ -13,6 +13,12 @@ class GameManager:
         self.high_score = ScoreManager()
         self.is_game_running = True
 
+    def start_game(self):
+        CLI.print_welcome_message()
+        player_name = CLI.get_player_name()
+        self.current_player = Player(player_name)
+        self.is_game_running = True
+
 
 class Player:
     def __init__(self, name):
