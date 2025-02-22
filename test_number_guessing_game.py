@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch
 import os
+import time
 from number_guessing_game import GameManager, Player, GameRound
 from number_guessing_game import GameSettings, CLI, ScoreManager
 
@@ -72,6 +73,42 @@ def test_attempts_decrease(game_round_fixed):
     initial_attempts = game_round_fixed.remaining_attempts
     game_round_fixed.process_guess(20)
     assert game_round_fixed.remaining_attempts == initial_attempts - 1
+
+
+def test_get_round_duration(game_round_fixed):
+    game_round_fixed.end_time = game_round_fixed.start_time + 10
+    duration = game_round_fixed.get_round_duration()
+    assert duration == 10
+
+
+def test_process_guess_edge_cases(game_round_fixed):
+    result = game_round_fixed.process_guess(game_round_fixed.target_number)
+    assert result == "correct"
+
+    result = game_round_fixed.process_guess(9999)
+    assert result == "less"
+
+    result = game_round_fixed.process_guess(-9999)
+    assert result == "greater"
+
+
+@pytest.fixture
+def game_round_with_score():
+    round_instance = GameRound(difficulty_level="medium",
+                               number_range=(1, 100),
+                               attempts=7, hints_remaining=2)
+    round_instance.target_number = 50  # For testing purposes
+    round_instance.remaining_attempts = 5  # Simulate remaining attempts
+    round_instance.end_time = time.time() + 5  # Simulate 5 seconds duration
+    return round_instance
+
+
+def test_calculate_score(game_round_with_score):
+    multiplayer = 2
+    score = game_round_with_score.calculate_score(multiplayer)
+
+    expected_score = max(0, (5 * multiplayer) - 5)
+    assert score == expected_score
 
 
 @pytest.fixture
