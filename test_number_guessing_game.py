@@ -1,6 +1,19 @@
 import pytest
 import os
-from number_guessing_game import GameSettings, ScoreManager, CLI
+from number_guessing_game import GameSettings, ScoreManager, CLI, GameRound
+
+
+@pytest.fixture
+def game_round():
+    return GameRound(difficulty_level="medium", number_range=(1, 100),
+                     attempts=7, hints_remaining=2)
+
+
+def test_generate_target_number(game_round):
+    game_round.generate_target_number()
+
+    assert game_round.target_number is not None
+    assert 1 <= game_round.target_number <= 100
 
 
 @pytest.fixture
