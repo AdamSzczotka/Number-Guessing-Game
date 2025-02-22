@@ -111,6 +111,47 @@ class CLI:
     def get_player_name():
         return input("Enter your name: ")
 
+    @staticmethod
+    def get_difficulty_choice(difficulty_levels):
+        print("Select difficulty:")
+        for level in difficulty_levels:
+            print(f"- {level} ({difficulty_levels[level]} attempts)")
+        return input("Your choice: ").lower()
+
+    @staticmethod
+    def get_player_guess():
+        return int(input("Enter your guess: "))
+
+    @staticmethod
+    def display_guess_result(result, target_number):
+        if result == "correct":
+            print("Congratulations! You guessed the correct number!")
+        elif result == "greater":
+            print("The number is greater than your guess.")
+        elif result == "less":
+            print("The number is less than your guess.")
+        elif result == "lost":
+            print(f"Game over! The correct number was {target_number}.")
+
+    @staticmethod
+    def display_game_stats(player, high_scores):
+        print(f"Player: {player.name}, Games Played: "
+              "{player.total_games_played}, Wins: {player.total_wins}")
+        high_scores.display_high_scores()
+
+    @staticmethod
+    def play_again():
+        choice = input("Do you want to play again? (yes/no): ").lower()
+        return choice == "yes"
+
+    @staticmethod
+    def show_hint(hint):
+        print(f"Hint: {hint}")
+
+    @staticmethod
+    def show_error_message(message):
+        print(message)
+
 
 class ScoreManager:
     def __init__(self):
