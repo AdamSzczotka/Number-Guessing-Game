@@ -179,54 +179,84 @@ class GameSettings:
 class CLI:
     @staticmethod
     def print_welcome_message():
-        print("Welcome to the Number Guessing Game!")
-        print("Rules: Guess the number between 1 and 100. "
-              "You have limited attempts based on your chosen difficulty.")
+        print("\nWelcome to the Number Guessing Game!")
+        print("Rules: Guess the number between 1 and 100.")
+        print("You have limited attempts based on your chosen difficulty.")
+        print("Type 'hint' to use a hint if available.\n")
 
     @staticmethod
     def get_player_name():
-        return input("Enter your name: ")
+        while True:
+            name = input("Enter your name: ").strip()
+            if name:
+                return name
+            print("Name cannot be empty. Please try again.")
 
     @staticmethod
     def get_difficulty_choice(difficulty_levels):
-        print("Select difficulty:")
+        print("\nSelect difficulty:")
         for level in difficulty_levels:
             print(f"- {level} ({difficulty_levels[level]} attempts)")
-        return input("Your choice: ").lower()
+        while True:
+            choice = input("Your choice: ").lower().strip()
+            if choice in difficulty_levels:
+                return choice
+            print("Invalid difficulty. Please try again.")
 
     @staticmethod
     def get_player_guess():
-        return int(input("Enter your guess: "))
+        while True:
+            guess = input(
+                "Enter your guess (or 'hint' for a hint): ").lower().strip()
+            if guess == "hint":
+                return guess
+            try:
+                return int(guess)
+            except ValueError:
+                print("Please enter a valid number or 'hint'.")
 
     @staticmethod
     def display_guess_result(result, target_number):
         if result == "correct":
-            print("Congratulations! You guessed the correct number!")
+            print("\n🎉 Congratulations! You guessed the correct number! 🎉")
         elif result == "greater":
-            print("The number is greater than your guess.")
+            print("The number is greater than your guess. ⬆️")
         elif result == "less":
-            print("The number is less than your guess.")
+            print("The number is less than your guess. ⬇️")
         elif result == "lost":
-            print(f"Game over! The correct number was {target_number}.")
+            print(f"\n😔 Game over! The correct number was {target_number}.")
 
     @staticmethod
     def display_game_stats(player, high_scores):
-        print(f"Player: {player.name}, Games Played: "
-              "{player.total_games_played}, Wins: {player.total_wins}")
+        print(f"\nPlayer: {player.name}")
+        print(f"Games Played: {player.total_games_played}")
+        print(f"Wins: {player.total_wins}")
+        if player.total_games_played > 0:
+            win_rate = (player.total_wins / player.total_games_played) * 100
+            print(f"Win Rate: {win_rate:.1f}%")
+        print("\nHigh Scores:")
         high_scores.display_high_scores()
 
     @staticmethod
     def play_again():
-        choice = input("Do you want to play again? (yes/no): ").lower()
-        return choice == "yes"
+        while True:
+            choice = input(
+                "\nDo you want to play again? (yes/no): ").lower().strip()
+            if choice in ["yes", "no", "y", "n"]:
+                return choice in ["yes", "y"]
+            print("Please answer 'yes' or 'no'.")
 
     @staticmethod
     def show_hint(hint):
-        print(f"Hint: {hint}")
+        print(f"💡 Hint: {hint}")
 
     @staticmethod
     def show_error_message(message):
-        print(message)
+        print(f"❌ Error: {message}")
+
+    @staticmethod
+    def show_goodbye_message():
+        print("\n👋 Thank you for playing! Goodbye!")
 
 
 class ScoreManager:
