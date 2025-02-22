@@ -306,12 +306,25 @@ class ScoreManager:
 class HintSystem:
     @staticmethod
     def generate_hint(target_number):
-        return f"The number is divisible by {
-            random.choice([x for x in range(1, 11) if target_number % x == 0])
-            }."
+        hint_types = [
+            lambda n: (
+                f"The number is divisible by "
+                f"{random.choice([x for x in range(1, 11) if n % x == 0])}"
+            ),
+            lambda n: f"The number is {'even' if n % 2 == 0 else 'odd'}",
+            lambda n: (
+                f"The number's digits sum to "
+                f"{sum(int(d) for d in str(n))}"
+            )
+        ]
+        return random.choice(hint_types)(target_number) + "."
 
 
-# Start the game
 if __name__ == "__main__":
-    game_manager = GameManager()
-    game_manager.start_game()
+    try:
+        game_manager = GameManager()
+        game_manager.start_game()
+    except KeyboardInterrupt:
+        print("\n\nGame interrupted. Goodbye!")
+    except Exception as e:
+        print(f"\nAn unexpected error occurred: {e}")
