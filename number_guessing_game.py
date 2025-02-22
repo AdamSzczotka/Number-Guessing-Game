@@ -159,7 +159,7 @@ class GameSettings:
             "medium": 2,
             "hard": 1
         }
-        self.score_multiplayer = {
+        self.score_multiplier = {
             "easy": 1,
             "medium": 2,
             "hard": 3
@@ -172,7 +172,7 @@ class GameSettings:
         return self.hints_per_difficulty[difficulty]
 
     def get_score_multiplier(self, difficulty):
-        return self.score_multiplayer[difficulty]
+        return self.score_multiplier[difficulty]
 
 
 class CLI:
