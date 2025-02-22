@@ -72,6 +72,7 @@ class GameManager:
 
             if not game_round.is_won:
                 CLI.display_guess_result("lost", game_round.target_number)
+                self.current_player.update_stats(game_round)
 
             CLI.display_game_stats(self.current_player, self.high_score)
         except ValueError as e:
