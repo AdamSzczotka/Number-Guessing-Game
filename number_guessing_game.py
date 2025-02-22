@@ -17,7 +17,7 @@ class GameManager:
         CLI.print_welcome_message()
         player_name = CLI.get_player_name()
         self.current_player = Player(player_name)
-        self.is_game_running = True
+        self.high_score.load_score_history()
 
 
 class Player:
@@ -43,6 +43,16 @@ class GameRound:
 
     def generate_target_number(self):
         self.target_number = random.randint(*self.number_range)
+
+    def process_guess(self, guess):
+        self.remaining_attempts -= 1
+        if guess == self.target_number:
+            self.end_time = time.time()
+            return "correct"
+        elif guess < self.target_number:
+            return "greater"
+        elif guess > self.target_number:
+            return "less"
 
 
 class GameSettings:
