@@ -54,6 +54,13 @@ class GameRound:
         elif guess > self.target_number:
             return "less"
 
+    def calculate_score(self, multiplayer):
+        duration = self.get_round_duration()
+        return max(0, (self.remaining_attempts * multiplayer) - int(duration))
+
+    def get_round_duration(self):
+        return (self.end_time or time.time()) - self.start_time
+
 
 class GameSettings:
     def __init__(self):
