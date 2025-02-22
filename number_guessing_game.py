@@ -23,7 +23,20 @@ class Player:
 
 
 class GameRound:
-    pass
+    def __init__(self, difficulty_level, number_range,
+                 attempts, hints_remaining):
+        self.target_number = None
+        self.remaining_attempts = attempts
+        self.difficulty_level = difficulty_level
+        self.number_range = number_range
+        self.start_time = time.time()
+        self.end_time = None
+        self.hints_remaining = hints_remaining
+        self.current_score = 0
+        self.is_won = False
+
+    def generate_target_number(self):
+        self.target_number = random.randint(*self.number_range)
 
 
 class GameSettings:
