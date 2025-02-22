@@ -42,6 +42,39 @@ def test_generate_target_number(game_round):
 
 
 @pytest.fixture
+def game_round_fixed():
+    round_instance = GameRound(difficulty_level="medium",
+                               number_range=(1, 100),
+                               attempts=7, hints_remaining=2)
+    round_instance.target_number = 50
+    return round_instance
+
+
+def test_process_guess_correct(game_round_fixed):
+    result = game_round_fixed.process_guess(50)
+    assert result == "correct"
+    assert game_round_fixed.end_time is not None
+
+
+def test_process_guess_greater(game_round_fixed):
+    result = game_round_fixed.process_guess(30)
+    assert result == "greater"
+    assert game_round_fixed.remaining_attempts == 6
+
+
+def test_process_guess_less(game_round_fixed):
+    result = game_round_fixed.process_guess(70)
+    assert result == "less"
+    assert game_round_fixed.remaining_attempts == 6
+
+
+def test_attempts_decrease(game_round_fixed):
+    initial_attempts = game_round_fixed.remaining_attempts
+    game_round_fixed.process_guess(20)
+    assert game_round_fixed.remaining_attempts == initial_attempts - 1
+
+
+@pytest.fixture
 def game_settings():
     return GameSettings()
 
