@@ -262,7 +262,6 @@ class CLI:
 class ScoreManager:
     def __init__(self):
         self.high_score = {}
-        self.score_history = {}
 
     def update_high_score(self, difficulty, score, player_name):
         if difficulty not in self.high_score or \
@@ -270,16 +269,24 @@ class ScoreManager:
             self.high_score[difficulty] = (player_name, score)
 
     def display_high_scores(self):
-        print("High Scores: ")
+        if not self.high_score:
+            print("No high scores yet!")
+            return
         for difficulty, (player, score) in self.high_score.items():
-            print(f"{difficulty.capitalize()}: {player} - {score}")
+            print(f"{difficulty.capitalize()}: {player} - {score} points")
 
     def save_score_history(self):
-        with open('score_history.json', 'w') as file:
-            json.dump(
-                {key: list(value) for key, value in self.high_score.items()},
-                file
-            )
+        try:
+            with open('score_history.json', 'w') as file:
+                json.dump(
+                    {
+                        key: list(value) for key,
+                        value in self.high_score.items()
+                        },
+                    file
+                )
+        except IOError as e:
+            print(f"Could not save scores: {e}")
 
     def load_score_history(self):
         try:
@@ -287,8 +294,12 @@ class ScoreManager:
                 data = json.load(file)
                 self.high_score = {
                     key: tuple(value) for key, value in data.items()
-                    }
+                }
         except FileNotFoundError:
+            self.high_score = {}
+        except json.JSONDecodeError:
+            print(
+                "Score history file is corrupted. Starting with fresh scores.")
             self.high_score = {}
 
 
