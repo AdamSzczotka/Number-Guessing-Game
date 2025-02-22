@@ -15,7 +15,11 @@ class GameManager:
 
 
 class Player:
-    pass
+    def __init__(self, name):
+        self.name = name
+        self.best_scores = {}
+        self.total_games_played = 0
+        self.total_wins = 0
 
 
 class GameRound:
