@@ -19,6 +19,47 @@ class GameManager:
         self.current_player = Player(player_name)
         self.high_score.load_score_history()
 
+        while self.is_game_running:
+            self.handle_game_round()
+            self.is_game_running = CLI.play_again()
+        self.quit_game()
+
+    def handle_game_round(self):
+        difficulty = CLI.get_difficulty_choice(
+            self.game_settings.difficulty_levels)
+        attempts = self.game_settings.get_attempts(difficulty)
+        hints_allowed = self.game_settings.get_hints_allowed(difficulty)
+
+        game_round = GameRound(difficulty, self.game_settings.number_range,
+                               attempts, hints_allowed)
+        game_round.generate_target_number()
+
+        while not game_round.check_game_over():
+            guess = CLI.get_player_guess()
+            result = game_round.process_guess(guess)
+            CLI.display_guess_result(result, game_round.target_number)
+
+            if result == "correct":
+                game_round.is_won = True
+                self.current_player.update_stats(game_round)
+                score = game_round.calculate_score(
+                    self.game_settings.get_score_multiplier(difficulty))
+                self.high_score.update_high_score(difficulty, score,
+                                                  self.current_player.name)
+                break
+            elif result == "hint":
+                hint = game_round.provide_hint()
+                CLI.show_hint(hint)
+
+        if not game_round.is_won:
+            CLI.display_guess_result("lost", game_round.target_number)
+
+        CLI.display_game_stats(self.current_player, self.high_score)
+
+    def quit_game(self):
+        self.high_score.save_score_history()
+        CLI.show_error_message("Thank you for playing! Goodbye!")
+
 
 class Player:
     def __init__(self, name):
